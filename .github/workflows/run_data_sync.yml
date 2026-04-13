@@ -22,6 +22,7 @@ on:
       - run_page/keep_to_strava_sync.py
       - run_page/oppo_sync.py
       - run_page/intervals_icu_sync.py
+      - run_page/codoon_sync.py
       - requirements.txt
 
 env:
@@ -229,10 +230,10 @@ jobs:
           # 分割 CODOON_TOKEN 为 refresh_token 和 user_id
           IFS=':' read -r refresh_token user_id <<< "${{ secrets.CODOON_TOKEN }}"
           python run_page/codoon_sync.py "$refresh_token" "$user_id" --from-auth-token --with-gpx
-            - name: Run db updater script to add 'Elevation Gain' field to db
-              if: env.RUN_TYPE == 'db_updater'
-              run: |
-                python run_page/db_updater.py
+      - name: Run db updater script to add 'Elevation Gain' field to db
+        if: env.RUN_TYPE == 'db_updater'
+        run: |
+          python run_page/db_updater.py
 
       - name: Make svg GitHub profile
         if: env.RUN_TYPE != 'pass'
