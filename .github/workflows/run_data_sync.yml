@@ -223,11 +223,16 @@ jobs:
           python run_page/intervals_icu_sync.py ${{ secrets.INTERVALS_ICU_ATHLETE_ID }} ${{ secrets.INTERVALS_ICU_API_KEY }}
         # Default syncs running activities only. To sync all types add --all
         # To change start date: --start-date 2020-01-01 (default: 2015-01-01)
-
-      - name: Run db updater script to add 'Elevation Gain' field to db
-        if: env.RUN_TYPE == 'db_updater'
+      - name: Run sync Codoon script
+        if: env.RUN_TYPE == 'codoon'
         run: |
-          python run_page/db_updater.py
+          # 分割 CODOON_TOKEN 为 refresh_token 和 user_id
+          IFS=':' read -r refresh_token user_id <<< "${{ secrets.CODOON_TOKEN }}"
+          python run_page/codoon_sync.py "$refresh_token" "$user_id" --from-auth-token --with-gpx
+            - name: Run db updater script to add 'Elevation Gain' field to db
+              if: env.RUN_TYPE == 'db_updater'
+              run: |
+                python run_page/db_updater.py
 
       - name: Make svg GitHub profile
         if: env.RUN_TYPE != 'pass'
